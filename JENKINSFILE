@@ -1,0 +1,116 @@
+pipeline {
+    agent any
+    stages {
+        // Definición de las etapas del pipeline
+        // Cada etapa representa una fase del proceso de integración continua
+        // Etapa para obtener el código fuente del repositorio
+        stage('Get Code') {
+            steps {
+                // Obtener código del repo
+                git 'https://github.com/darioreyesr25/todo-list-aws-master.git'
+                sh 'ls'
+                echo WORKSPACE
+            }
+        }
+        // Etapa para ejecutar pruebas unitarias con cobertura de código
+        stage('Unit') {
+            steps {
+                // Ejecución de las pruebas unitarias con cobertura de código
+                // Para evitar que el pipeline ejecute mas de una vez pytest test/unit, se crea el archivo coverage.xml directamente
+                sh '''
+                    export PYTHONPATH=$WORKSPACE
+                    coverage run --branch --source=app --omit=app/__init__.py,app/api.py -m pytest --junitxml=result-unit.xml test/unit
+                    coverage xml
+                '''
+            }
+        }
+        // Etapa para análisis estático de código con flake8
+        stage('Static') {
+            steps {
+                // Ejecución de flake8 ignorando errores de salida para que el pipeline continúe
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    // Ejecución de flake8 y redirección de la salida a un archivo
+                    sh '''
+                        flake8 --exit-zero --format=pylint app > flake8.out
+                    '''
+                    
+                    // Registro de incidencias con Warnings Next Generation Plugin
+                    recordIssues(
+                        tools: [flake8(name: 'Flake8', pattern: 'flake8.out')],
+                        qualityGates: [
+                                // Si hay más de 8 avisos: UNSTABLE (Amarillo)
+                                [threshold: 8, type: 'TOTAL', unstable: true],
+                                // Si hay más de 11 avisos: FAILURE (Rojo)
+                                [threshold: 10, type: 'TOTAL', unstable: false]
+                        ]
+                    )
+                }
+            }
+        }
+
+        stage('Security Test') {
+            steps {
+                // Ejecución de Bandit ignorando errores de salida para que el pipeline continúe
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    // Ejecución de Bandit y redirección de la salida a un archivo
+                    sh '''
+                        bandit --exit-zero -r . -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}"
+                    '''
+                    // Configuración de los Quality Gates para Bandit
+                    recordIssues(
+                        tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')],
+                        qualityGates: [
+                            // Requisito: 2 o más hallazgos = Unstable (Amarillo)
+                            [threshold: 2, type: 'TOTAL', unstable: true],
+                            
+                            // Requisito: 4 o más hallazgos = Unhealthy/Failure (Rojo)
+                            [threshold: 4, type: 'TOTAL', unstable: false]
+                        ]
+                    )
+                }
+            }
+        }
+
+        //Etapa desplegar aplicación en AWS
+        stage('Deploy') {
+            steps {
+                // Despliegue de la aplicación en AWS utilizando SAM CLI
+                sh '''
+                    sam build --use-container
+                    sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset
+                '''
+            }
+        }
+
+        //etapa para ejecutar pruebas de integración con pytest
+        stage('Rest Test') {
+            steps {
+                sh '''
+                    export PYTHONPATH=$WORKSPACE
+                    python -m pytest --junitxml=result-rest.xml test/integration
+                '''
+            }
+        }
+
+        //Etapa “Promote” para marcar la versión como “Release” en el archivo CHANGELOG.md y ser desplegada en producción. Y hacer merge a master
+        stage('Promote') {
+            steps {
+                sh '''
+                    # Marcar como Release en el CHANGELOG.md
+                    fecha=$(date +"%Y-%m-%d")
+                    version="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
+                    echo -e "\n## [Release] - $fecha\n### Promoción a producción\n" >> CHANGELOG.md
+                    git add CHANGELOG.md
+                    git commit -m "chore: marcar versión $version como Release en CHANGELOG.md"
+                    # Tag y push
+                    git tag -a v$version -m "Release version $version"
+                    git push origin v$version
+                    # Merge a master
+                    git checkout master
+                    git merge main
+                    git push origin master
+                '''
+            }
+        }
+    }    
+}
