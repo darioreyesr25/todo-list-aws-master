@@ -19,11 +19,10 @@ pipeline {
         stage('Unit') {
             steps {
                 // Ejecución de las pruebas unitarias 
-                // Para evitar que el pipeline ejecute mas de una vez pytest test/unit
                 sh '''
                     cd todo-list-aws-master
                     export PYTHONPATH=$WORKSPACE
-                    python -m pytest --junitxml=result-unit.xml test/unit
+                    python -m unittest discover -s test/unit
                 '''
             }
         }
