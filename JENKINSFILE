@@ -90,7 +90,7 @@ pipeline {
         //Etapa “Promote” para marcar la versión como “Release” en el archivo CHANGELOG.md y ser desplegada en producción. Y hacer merge a master
         stage('Promote') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                     sh '''
                         cd todo-list-aws-master
                         # Marcar como Release en el CHANGELOG.md
