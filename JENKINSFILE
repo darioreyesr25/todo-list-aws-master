@@ -12,15 +12,14 @@ pipeline {
                 echo WORKSPACE
             }
         }
-        // Etapa para ejecutar pruebas unitarias con cobertura de código
+        // Etapa para ejecutar pruebas unitarias
         stage('Unit') {
             steps {
-                // Ejecución de las pruebas unitarias con cobertura de código
-                // Para evitar que el pipeline ejecute mas de una vez pytest test/unit, se crea el archivo coverage.xml directamente
+                // Ejecución de las pruebas unitarias 
+                // Para evitar que el pipeline ejecute mas de una vez pytest test/unit
                 sh '''
                     export PYTHONPATH=$WORKSPACE
-                    coverage run --branch --source=app --omit=app/__init__.py,app/api.py -m pytest --junitxml=result-unit.xml test/unit
-                    coverage xml
+                    python -m pytest --junitxml=result-unit.xml test/unit
                 '''
             }
         }
