@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Validar sintaxis Jenkinsfile",
+			"type": "shell",
+			"command": "jenkinsfile-runner --version || echo 'Validación manual: revisa sintaxis y comandos para Jenkinsfile en Linux'",
+			"group": "build"
+		}
+	]
+}

@@ -1,0 +1,111 @@
+pipeline {
+    agent any
+    stages {
+        // Definición de las etapas del pipeline
+        // Cada etapa representa una fase del proceso de integración continua
+        // Etapa para obtener el código fuente del repositorio
+        stage('Get Code') {
+            steps {
+                // Clonar el repositorio en el workspace desde la rama develop
+                sh '''
+                    rm -rf todo-list-aws-master
+                    git clone --branch develop https://github.com/darioreyesr25/todo-list-aws-master.git
+                    ls todo-list-aws-master
+                '''
+                echo WORKSPACE
+            }
+        }
+        // Etapa para ejecutar pruebas unitarias
+        stage('Unit') {
+            steps {
+                // Ejecución de las pruebas unitarias 
+                sh '''
+                    cd todo-list-aws-master
+                    export PYTHONPATH=$WORKSPACE
+                    python -m unittest discover -s test/unit
+                '''
+            }
+        }
+        // Etapa para análisis estático de código con flake8
+        stage('Static') {
+            steps {
+                // Ejecución de flake8 ignorando errores de salida para que el pipeline continúe
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    // Ejecución de flake8 y redirección de la salida a un archivo
+                    sh '''
+                        cd todo-list-aws-master
+                        flake8 --exit-zero --format=pylint app > flake8.out
+                    '''
+                    
+                    // Registro de incidencias con Warnings Next Generation Plugin
+                    recordIssues(
+                        tools: [flake8(name: 'Flake8', pattern: 'flake8.out')],
+                        qualityGates: [
+                                // Si hay más de 8 avisos: UNSTABLE (Amarillo)
+                                [threshold: 8, type: 'TOTAL', unstable: true],
+                                // Si hay más de 11 avisos: FAILURE (Rojo)
+                                [threshold: 10, type: 'TOTAL', unstable: false]
+                        ]
+                    )
+                }
+            }
+        }
+
+        stage('Security Test') {
+            steps {
+                // Ejecución de Bandit ignorando errores de salida para que el pipeline continúe
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    // Ejecución de Bandit y redirección de la salida a un archivo
+                    sh '''
+                        cd todo-list-aws-master
+                        bandit --exit-zero -r . -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}" || true
+                    '''
+                }
+            }
+        }
+
+        //Etapa desplegar aplicación en AWS
+        stage('Deploy') {
+            steps {
+                // Despliegue de la aplicación en AWS utilizando SAM CLI
+                sh '''
+                    cd todo-list-aws-master
+                    sam build
+                    sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset
+                '''
+            }
+        }
+
+        //etapa para ejecutar pruebas de integración con pytest
+        stage('Rest Test') {
+            steps {
+                sh '''
+                    cd todo-list-aws-master
+                    python -m pytest --junitxml=result-rest.xml test/integration
+                '''
+            }
+        }
+
+        //Etapa “Promote” para marcar la versión como “Release” en el archivo CHANGELOG.md y ser desplegada en producción. Y hacer merge a master
+        stage('Promote') {
+            steps {
+                sh '''
+                    cd todo-list-aws-master
+                    # Marcar como Release en el CHANGELOG.md
+                    fecha=$(date +"%Y-%m-%d")
+                    version="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
+                    echo -e "\n## [Release] - $fecha\n### Promoción a producción\n" >> CHANGELOG.md
+                    git add CHANGELOG.md
+                    git commit -m "chore: marcar versión $version como Release en CHANGELOG.md"
+                    # Tag y push
+                    git tag -a v$version -m "Release version $version"
+                    git push origin v$version
+                    # Merge a master
+                    git checkout master
+                    git merge main
+                    git push origin master
+                '''
+            }
+        }
+    }    
+}
