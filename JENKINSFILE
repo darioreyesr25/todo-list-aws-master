@@ -89,22 +89,24 @@ pipeline {
         //Etapa “Promote” para marcar la versión como “Release” en el archivo CHANGELOG.md y ser desplegada en producción. Y hacer merge a master
         stage('Promote') {
             steps {
-                sh '''
-                    cd todo-list-aws-master
-                    # Marcar como Release en el CHANGELOG.md
-                    fecha=$(date +"%Y-%m-%d")
-                    version="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
-                    echo -e "\n## [Release] - $fecha\n### Promoción a producción\n" >> CHANGELOG.md
-                    git add CHANGELOG.md
-                    git commit -m "chore: marcar versión $version como Release en CHANGELOG.md"
-                    # Tag y push
-                    git tag -a v$version -m "Release version $version"
-                    git push origin v$version
-                    # Merge a master
-                    git checkout master
-                    git merge main
-                    git push origin master
-                '''
+                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                    sh '''
+                        cd todo-list-aws-master
+                        # Marcar como Release en el CHANGELOG.md
+                        fecha=$(date +"%Y-%m-%d")
+                        version="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
+                        echo -e "\n## [Release] - $fecha\n### Promoción a producción\n" >> CHANGELOG.md
+                        git add CHANGELOG.md
+                        git commit -m "chore: marcar versión $version como Release en CHANGELOG.md"
+                        # Tag y push
+                        git tag -a v$version -m "Release version $version"
+                        git push https://${GIT_USER}:${GIT_TOKEN}@github.com/darioreyesr25/todo-list-aws-master.git v$version
+                        # Merge a master
+                        git checkout master
+                        git merge develop
+                        git push https://${GIT_USER}:${GIT_TOKEN}@github.com/darioreyesr25/todo-list-aws-master.git master
+                    '''
+                }
             }
         }
     }    
