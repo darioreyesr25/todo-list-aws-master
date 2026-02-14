@@ -81,7 +81,8 @@ pipeline {
             steps {
                 sh '''
                     cd todo-list-aws-master
-                    python -m pytest --junitxml=result-rest.xml test/integration
+                    export PYTHONPATH=$WORKSPACE
+                    python -m unittest discover -s test/integration
                 '''
             }
         }
