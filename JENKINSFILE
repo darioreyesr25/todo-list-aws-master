@@ -10,8 +10,7 @@ pipeline {
                 sh '''
                     rm -rf todo-list-aws-master
                     git clone https://github.com/darioreyesr25/todo-list-aws-master.git
-                    cd todo-list-aws-master
-                    ls
+                    ls todo-list-aws-master
                 '''
                 echo WORKSPACE
             }
@@ -22,6 +21,7 @@ pipeline {
                 // Ejecución de las pruebas unitarias 
                 // Para evitar que el pipeline ejecute mas de una vez pytest test/unit
                 sh '''
+                    cd todo-list-aws-master
                     export PYTHONPATH=$WORKSPACE
                     python -m pytest --junitxml=result-unit.xml test/unit
                 '''
@@ -34,6 +34,7 @@ pipeline {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     // Ejecución de flake8 y redirección de la salida a un archivo
                     sh '''
+                        cd todo-list-aws-master
                         flake8 --exit-zero --format=pylint app > flake8.out
                     '''
                     
@@ -57,6 +58,7 @@ pipeline {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     // Ejecución de Bandit y redirección de la salida a un archivo
                     sh '''
+                        cd todo-list-aws-master
                         bandit --exit-zero -r . -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}"
                     '''
                     // Configuración de los Quality Gates para Bandit
@@ -79,6 +81,7 @@ pipeline {
             steps {
                 // Despliegue de la aplicación en AWS utilizando SAM CLI
                 sh '''
+                    cd todo-list-aws-master
                     sam build --use-container
                     sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset
                 '''
@@ -89,7 +92,7 @@ pipeline {
         stage('Rest Test') {
             steps {
                 sh '''
-                    export PYTHONPATH=$WORKSPACE
+                    cd todo-list-aws-master
                     python -m pytest --junitxml=result-rest.xml test/integration
                 '''
             }
@@ -99,6 +102,7 @@ pipeline {
         stage('Promote') {
             steps {
                 sh '''
+                    cd todo-list-aws-master
                     # Marcar como Release en el CHANGELOG.md
                     fecha=$(date +"%Y-%m-%d")
                     version="$(git describe --tags --abbrev=0 2>/dev/null || echo 1.0.0)"
