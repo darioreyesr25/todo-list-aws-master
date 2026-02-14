@@ -6,9 +6,13 @@ pipeline {
         // Etapa para obtener el código fuente del repositorio
         stage('Get Code') {
             steps {
-                // Obtener código del repo
-                git clone 'https://github.com/darioreyesr25/todo-list-aws-master.git'
-                sh 'ls'
+                // Clonar el repositorio en el workspace
+                sh '''
+                    rm -rf todo-list-aws-master
+                    git clone https://github.com/darioreyesr25/todo-list-aws-master.git
+                    cd todo-list-aws-master
+                    ls
+                '''
                 echo WORKSPACE
             }
         }
