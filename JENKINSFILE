@@ -48,6 +48,8 @@ pipeline {
                     sh '''
                         cd todo-list-aws-master
                         bandit --exit-zero -r . -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}" || true
+                        # Garantizar que el archivo bandit.out exista aunque esté vacío
+                        test -f bandit.out || touch bandit.out
                     '''
                     // Mostrar el reporte de Bandit en la consola
                     sh 'cat todo-list-aws-master/bandit.out || true'
