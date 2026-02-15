@@ -12,6 +12,7 @@ pipeline {
             steps {
                 // Clonar el repositorio en el workspace desde la rama develop
                 sh '''
+                    echo "La rama es: $BRANCH_NAME"
                     rm -rf todo-list-aws-master
                     # Selecciona la rama según el entorno
                     if [ "$ENV" = "production" ]; then
