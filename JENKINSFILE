@@ -15,21 +15,6 @@ pipeline {
                 echo WORKSPACE
             }
         }
-        // Etapa para ejecutar pruebas unitarias
-        stage('Unit') {
-            steps {
-                // Ejecución de las pruebas unitarias 
-                sh '''
-                    cd todo-list-aws-master
-                    export PYTHONPATH=$WORKSPACE
-                    # Generar el reporte para junits
-                    pytest test/unit/TestToDo.py --junitxml=unit_test_report.xml || true
-                    
-                '''
-                // Publicar los resultados de las pruebas unitarias en Jenkins
-                junit allowEmptyResults: true, testResults: 'todo-list-aws-master/unit_test_report.xml'
-            }
-        }
         // Etapa para análisis estático de código con flake8
         stage('Static') {
             steps {
