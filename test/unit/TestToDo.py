@@ -1,13 +1,13 @@
-
+# from pprint import pprint
 import warnings
 import unittest
 import boto3
-from moto import mock_dynamodb
+from moto import mock_dynamodb2
 import sys
 import os
 import json
 
-@mock_dynamodb
+@mock_dynamodb2
 class TestDatabaseFunctions(unittest.TestCase):
     def setUp(self):
         print ('---------------------')
