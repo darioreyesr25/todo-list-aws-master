@@ -1,13 +1,14 @@
 pipeline {
     agent any
     stages {
-                sh '''
-                    cd todo-list-aws-master
-                    pip install --user boto3 moto
+        // Definición de las etapas del pipeline
+        // Cada etapa representa una fase del proceso de integración continua
+        // Etapa para obtener el código fuente del repositorio
         stage('Get Code') {
             steps {
                 // Clonar el repositorio en el workspace desde la rama develop
                 sh '''
+                    pip install --user boto3 moto
                     rm -rf todo-list-aws-master
                     git clone --branch develop https://github.com/darioreyesr25/todo-list-aws-master.git
                     ls todo-list-aws-master
