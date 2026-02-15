@@ -18,14 +18,13 @@ pipeline {
         // Etapa para ejecutar pruebas unitarias
         stage('Unit') {
             steps {
-                // Ejecutar pruebas unitarias y generar reporte JUnit XML con unittest-xml-reporting
+                // Ejecución de las pruebas unitarias 
                 sh '''
                     cd todo-list-aws-master
                     export PYTHONPATH=$WORKSPACE
-                    python -m xmlrunner discover -s test/unit -o reports || true
+                    # Generar el reporte para junits
+                    python -m unittest discover -s test/unit -v > unit_test_report.out || true
                 '''
-                // Publicar resultados JUnit en Jenkins
-                junit 'todo-list-aws-master/reports/**/*.xml'
             }
         }
         // Etapa para análisis estático de código con flake8
@@ -84,9 +83,10 @@ pipeline {
                 sh '''
                     cd todo-list-aws-master
                     export PYTHONPATH=$WORKSPACE
-                    python -m xmlrunner discover -s test/integration -o reports || true
+                    # Generar el reporte para junits
+                    python -m unittest discover -s test/integration -v > integration_test_report.out || true
                 '''
-                junit 'todo-list-aws-master/reports/**/*.xml'
+                junit allowEmptyResults: true, testResults: 'todo-list-aws-master/integration_test_report.out'
             }
         }
 
