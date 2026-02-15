@@ -80,12 +80,16 @@ pipeline {
                     echo "BASE_URL obtenido: $BASE_URL"
                     echo $BASE_URL > ../base_url.txt
                 '''
+                // Guardar el archivo base_url.txt para otras etapas
+                stash includes: 'base_url.txt', name: 'baseurlfile'
             }
         }
 
         //etapa para ejecutar pruebas de integración con pytest
         stage('Rest Test') {
             steps {
+                // Recuperar el archivo base_url.txt guardado en la etapa Deploy
+                unstash 'baseurlfile'
                 sh '''
                     cd todo-list-aws-master
                     export BASE_URL=$(cat ../base_url.txt)

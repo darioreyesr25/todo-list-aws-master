@@ -115,7 +115,7 @@ Outputs:
   BaseUrlApi:
     Description: "Base URL of API"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
-
+  # Para obtener la URL de cada endpoint, se puede usar el siguiente formato:
   ApiUrl:
     Description: "URL de la API Gateway para integración Jenkins"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
