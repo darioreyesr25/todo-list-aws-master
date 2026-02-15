@@ -49,6 +49,16 @@ pipeline {
                         cd todo-list-aws-master
                         bandit --exit-zero -r . -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}" || true
                     '''
+                    // Registro de incidencias con Warnings Next Generation Plugin, continuar sin importar el resultado de Bandit
+                    recordIssues(
+                        tools: [bandit(name: 'Bandit', pattern: 'todo-list-aws-master/bandit.out')],
+                        qualityGates: [
+                                // Si hay más de 5 avisos: UNSTABLE (Amarillo)
+                                [threshold: 5, type: 'TOTAL', unstable: true],
+                                // Si hay más de 10 avisos: FAILURE (Rojo)
+                                [threshold: 10, type: 'TOTAL', unstable: false]
+                        ]
+                    )
                 }
             }
         }
