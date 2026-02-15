@@ -23,7 +23,7 @@ pipeline {
                     // Ejecución de flake8 y redirección de la salida a un archivo
                     sh '''
                         cd todo-list-aws-master
-                        flake8 --exit-zero --format=pylint app > flake8.out
+                        flake8 --exit-zero --format=pylint src > flake8.out
                     '''
                     
                     // Registro de incidencias con Warnings Next Generation Plugin
