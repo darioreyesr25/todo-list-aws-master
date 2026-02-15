@@ -51,7 +51,16 @@ pipeline {
                     '''
                     // Registro de incidencias con Warnings Next Generation Plugin, continuar sin importar el resultado de Bandit
                     recordIssues(
-                        tools: [bandit(name: 'Bandit', pattern: 'todo-list-aws-master/bandit.out')],
+                        tools: [genericParser(
+                            name: 'Bandit',
+                            pattern: 'todo-list-aws-master/bandit.out',
+                            regexp: '^(.+?):(\\d+): \\[(.+?)\\] (.+)$',
+                            example: '/path/to/file.py:10: [B101] Use of assert detected.',
+                            fileNamePattern: 1,
+                            linePattern: 2,
+                            categoryPattern: 3,
+                            messagePattern: 4
+                        )],
                         qualityGates: [
                                 // Si hay más de 5 avisos: UNSTABLE (Amarillo)
                                 [threshold: 5, type: 'TOTAL', unstable: true],
