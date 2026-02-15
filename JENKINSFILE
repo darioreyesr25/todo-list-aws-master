@@ -76,7 +76,7 @@ pipeline {
                     sam build
                     sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset
                     # Obtener la URL del API Gateway del output de CloudFormation
-                    export BASE_URL=$(aws cloudformation describe-stacks --stack-name staging --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
+                    export BASE_URL=$(aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
                     echo "BASE_URL obtenido: $BASE_URL"
                     echo $BASE_URL > ../base_url.txt
                 '''
