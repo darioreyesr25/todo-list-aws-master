@@ -23,7 +23,7 @@ pipeline {
                     cd todo-list-aws-master
                     export PYTHONPATH=$WORKSPACE
                     # Generar el reporte para junits
-                    pytest test/unit/TestToDo.py --junitxml=unit_test_report.xml || true
+                    pytest test/unit --junitxml=unit_test_report.xml || true
                 '''
                 // Publicar los resultados de las pruebas unitarias en Jenkins
                 junit allowEmptyResults: true, testResults: 'todo-list-aws-master/unit_test_report.xml'
@@ -53,7 +53,7 @@ pipeline {
                 }
             }
         }
-        // Etapa para análisis de seguridad con Bandit
+
         stage('Security Test') {
             steps {
                 // Ejecución de Bandit ignorando errores de salida para que el pipeline continúe
