@@ -125,7 +125,7 @@ pipeline {
             }
             steps {
                 script {
-                    // Si la etapa se omite, no marcar UNSTABLE sino SUCCESS para que el pipeline no se marque como inestable
+                    // Si la etapa se omite, no marcar UNSTABLE sino SUCCESS para que el pipeline no se marque como inestable sino como exitoso, ya que no es un error sino una decisión de omitir esta etapa en entornos que no son producción
                     currentBuild.result = 'SUCCESS'
                 }
                 withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
