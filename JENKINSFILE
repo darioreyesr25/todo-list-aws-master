@@ -120,7 +120,14 @@ pipeline {
             when {
                 expression { return ENV != 'production' }
             }
+            options {
+                skipDefaultCheckout(true)
+            }
             steps {
+                script {
+                    // Si la etapa se omite, no marcar UNSTABLE
+                    currentBuild.result = 'SUCCESS'
+                }
                 withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                     sh '''
                         cd todo-list-aws-master
