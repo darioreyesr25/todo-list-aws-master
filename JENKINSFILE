@@ -115,7 +115,7 @@ pipeline {
             }
         }
 
-        //Etapa “Promote” para marcar la versión como “Release” en el archivo CHANGELOG.md y ser desplegada en producción. Y hacer merge a master
+        //Etapa “Promote” para marcar la versión como “Release” en el archivo CHANGELOG.md y ser desplegada en producción. Y hacer merge a master si la promoción es exitosa. Esta etapa solo se ejecutará si el entorno no es producción, para evitar que se ejecute en master y cause un bucle infinito de promociones.
         stage('Promote') {
             when {
                 expression { return ENV != 'production' }
