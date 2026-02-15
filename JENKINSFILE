@@ -23,12 +23,12 @@ pipeline {
                     // Ejecución de flake8 y redirección de la salida a un archivo
                     sh '''
                         cd todo-list-aws-master
-                        flake8 --exit-zero --format=pylint src > flake8.out
+                        flake8 --exit-zero --format=pylint src > ../flake8.out
                     '''
                     
                     // Registro de incidencias con Warnings Next Generation Plugin
                     recordIssues(
-                        tools: [flake8(name: 'Flake8', pattern: 'flake8.out')],
+                        tools: [flake8(name: 'Flake8', pattern: '../flake8.out')],
                         qualityGates: [
                                 // Si hay más de 8 avisos: UNSTABLE (Amarillo)
                                 [threshold: 8, type: 'TOTAL', unstable: true],
