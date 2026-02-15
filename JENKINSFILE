@@ -86,7 +86,7 @@ pipeline {
                     cd todo-list-aws-master
                     export PYTHONPATH=$WORKSPACE
                     # Generar el reporte para junits
-                    pytest test/integration --junitxml=integration_test_report.xml || true
+                    pytest test/integration/todoApiTest.py --junitxml=integration_test_report.xml || true
                 '''
                 junit allowEmptyResults: true, testResults: 'todo-list-aws-master/integration_test_report.xml'
             }
