@@ -120,6 +120,7 @@ pipeline {
             when {
                 expression { return ENV != 'production' }
             }
+            // Omitir la etapa de promoción en entornos que no son producción, pero marcar el build como SUCCESS para que el pipeline no se marque como inestable sino como exitoso, ya que no es un error sino una decisión de omitir esta etapa en entornos que no son producción
             options {
                 skipDefaultCheckout(true)
             }
