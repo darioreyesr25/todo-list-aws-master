@@ -1,9 +1,9 @@
 pipeline {
     agent any
     stages {
-        // Definición de las etapas del pipeline
-        // Cada etapa representa una fase del proceso de integración continua
-        // Etapa para obtener el código fuente del repositorio
+                sh '''
+                    cd todo-list-aws-master
+                    pip install --user boto3 moto
         stage('Get Code') {
             steps {
                 // Clonar el repositorio en el workspace desde la rama develop
