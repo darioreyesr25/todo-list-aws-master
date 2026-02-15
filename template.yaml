@@ -120,7 +120,7 @@ Outputs:
     Description: "URL de la API Gateway para integración Jenkins"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
     Export:
-      Name: ApiUrl
+      Name: !Sub "ApiUrl${Stage}"
   CreateTodoApi:
     Description: "API Gateway endpoint URL for ${opt:stage} stage for Create TODO"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/todos/"
