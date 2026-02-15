@@ -53,7 +53,7 @@ pipeline {
                 }
             }
         }
-
+        // Etapa para análisis de seguridad con Bandit
         stage('Security Test') {
             steps {
                 // Ejecución de Bandit ignorando errores de salida para que el pipeline continúe
