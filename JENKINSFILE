@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    environment {
+        // Detecta el entorno según la rama: master=production, otro=staging
+        ENV = "${env.BRANCH_NAME == 'master' ? 'production' : 'staging'}"
+    }
     stages {
         // Definición de las etapas del pipeline
         // Cada etapa representa una fase del proceso de integración continua
@@ -9,7 +13,15 @@ pipeline {
                 // Clonar el repositorio en el workspace desde la rama develop
                 sh '''
                     rm -rf todo-list-aws-master
-                    git clone --branch develop https://github.com/darioreyesr25/todo-list-aws-master.git
+                    # Selecciona la rama según el entorno
+                    if [ "$ENV" = "production" ]; then
+                        BRANCH=master
+                    elif [ "$ENV" = "staging" ]; then
+                        BRANCH=develop
+                    else
+                        BRANCH=develop
+                    fi
+                    git clone --branch $BRANCH https://github.com/darioreyesr25/todo-list-aws-master.git
                     ls todo-list-aws-master
                 '''
                 echo WORKSPACE
@@ -66,9 +78,14 @@ pipeline {
                 sh '''
                     cd todo-list-aws-master
                     sam build
-                    sam deploy --config-env staging --no-confirm-changeset --no-fail-on-empty-changeset
+                    sam deploy --config-env $ENV --no-confirm-changeset --no-fail-on-empty-changeset
                     # Obtener la URL del API Gateway del output de CloudFormation
-                    export BASE_URL=$(aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
+                    if [ "$ENV" = "production" ]; then
+                        STACK_NAME=todo-list-aws-production
+                    else
+                        STACK_NAME=todo-list-aws-staging
+                    fi
+                    export BASE_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
                     echo "BASE_URL obtenido: $BASE_URL"
                     echo $BASE_URL > ../base_url.txt
                 '''
@@ -87,7 +104,11 @@ pipeline {
                     export BASE_URL=$(cat ../base_url.txt)
                     export PYTHONPATH=$WORKSPACE
                     # Generar el reporte para junits
-                    pytest test/integration/todoApiTest.py --junitxml=integration_test_report.xml || true
+                    if [ "$ENV" = "production" ]; then
+                        pytest test/integration/todoApiTest.py -k "get or list" --junitxml=integration_test_report.xml || true
+                    else
+                        pytest test/integration/todoApiTest.py --junitxml=integration_test_report.xml || true
+                    fi
                 '''
                 junit allowEmptyResults: true, testResults: 'todo-list-aws-master/integration_test_report.xml'
             }
