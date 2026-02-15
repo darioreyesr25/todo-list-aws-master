@@ -23,8 +23,10 @@ pipeline {
                     cd todo-list-aws-master
                     export PYTHONPATH=$WORKSPACE
                     # Generar el reporte para junits
-                    python -m unittest discover -s test/unit -v > unit_test_report.out || true
+                    pytest test/unit --junitxml=unit_test_report.xml || true
                 '''
+                // Publicar los resultados de las pruebas unitarias en Jenkins
+                junit allowEmptyResults: true, testResults: 'todo-list-aws-master/unit_test_report.xml'
             }
         }
         // Etapa para análisis estático de código con flake8
@@ -84,9 +86,9 @@ pipeline {
                     cd todo-list-aws-master
                     export PYTHONPATH=$WORKSPACE
                     # Generar el reporte para junits
-                    python -m unittest discover -s test/integration -v > integration_test_report.out || true
+                    pytest test/integration --junitxml=integration_test_report.xml || true
                 '''
-                junit allowEmptyResults: true, testResults: 'todo-list-aws-master/integration_test_report.out'
+                junit allowEmptyResults: true, testResults: 'todo-list-aws-master/integration_test_report.xml'
             }
         }
 
