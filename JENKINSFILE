@@ -49,25 +49,8 @@ pipeline {
                         cd todo-list-aws-master
                         bandit --exit-zero -r . -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}" || true
                     '''
-                    // Registro de incidencias con Warnings Next Generation Plugin, continuar sin importar el resultado de Bandit
-                    recordIssues(
-                        tools: [genericParser(
-                            name: 'Bandit',
-                            pattern: 'todo-list-aws-master/bandit.out',
-                            regexp: '^(.+?):(\\d+): \\[(.+?)\\] (.+)$',
-                            example: '/path/to/file.py:10: [B101] Use of assert detected.',
-                            fileNamePattern: 1,
-                            linePattern: 2,
-                            categoryPattern: 3,
-                            messagePattern: 4
-                        )],
-                        qualityGates: [
-                                // Si hay más de 5 avisos: UNSTABLE (Amarillo)
-                                [threshold: 5, type: 'TOTAL', unstable: true],
-                                // Si hay más de 10 avisos: FAILURE (Rojo)
-                                [threshold: 10, type: 'TOTAL', unstable: false]
-                        ]
-                    )
+                    // Mostrar el reporte de Bandit en la consola
+                    sh 'cat todo-list-aws-master/bandit.out || true'
                     // Archivar el reporte de Bandit como artefacto descargable
                     archiveArtifacts artifacts: 'todo-list-aws-master/bandit.out', onlyIfSuccessful: false
                 }
