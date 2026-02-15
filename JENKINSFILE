@@ -8,7 +8,6 @@ pipeline {
             steps {
                 // Clonar el repositorio en el workspace desde la rama develop
                 sh '''
-                    pip install --user boto3 moto
                     rm -rf todo-list-aws-master
                     git clone --branch develop https://github.com/darioreyesr25/todo-list-aws-master.git
                     ls todo-list-aws-master
