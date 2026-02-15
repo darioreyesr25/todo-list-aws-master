@@ -10,11 +10,10 @@ pipeline {
         // Etapa para obtener el código fuente del repositorio
         stage('Get Code') {
             steps {
-                // Clonar el repositorio en el workspace desde la rama develop
+                // Clonar el repositorio en el workspace desde la rama correspondiente
                 sh '''
                     echo "La rama es: $BRANCH_NAME"
                     rm -rf todo-list-aws-master
-                    # Selecciona la rama según el entorno
                     if [ "$ENV" = "production" ]; then
                         BRANCH=master
                     elif [ "$ENV" = "staging" ]; then
@@ -25,6 +24,8 @@ pipeline {
                     git clone --branch $BRANCH https://github.com/darioreyesr25/todo-list-aws-master.git
                     ls todo-list-aws-master
                 '''
+                // Stash del repositorio para compartir entre agentes
+                stash includes: 'todo-list-aws-master/**', name: 'repo'
                 echo WORKSPACE
             }
         }
@@ -32,6 +33,7 @@ pipeline {
         stage('Static') {
             agent { label 'agente2' }
             steps {
+                unstash 'repo'
                 // Ejecución de flake8 ignorando errores de salida para que el pipeline continúe
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     // Ejecución de flake8 y redirección de la salida a un archivo
@@ -57,6 +59,7 @@ pipeline {
         stage('Security Test') {
             agent { label 'agente2' }
             steps {
+                unstash 'repo'
                 // Ejecución de Bandit ignorando errores de salida para que el pipeline continúe
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     // Ejecución de Bandit y redirección de la salida a un archivo
@@ -101,6 +104,7 @@ pipeline {
         stage('Rest Test') {
             agent { label 'agente2' }
             steps {
+                unstash 'repo'
                 // Recuperar el archivo base_url.txt guardado en la etapa Deploy
                 unstash 'baseurlfile'
                 sh '''
