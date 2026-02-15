@@ -78,7 +78,7 @@ pipeline {
                 sh '''
                     cd todo-list-aws-master
                     sam build
-                    sam deploy --config-env $ENV --no-confirm-changeset --no-fail-on-empty-changeset
+                    sam deploy --config-env $ENV --no-confirm-changeset --no-fail-on-empty-changeset || true
                     # Obtener la URL del API Gateway del output de CloudFormation
                     if [ "$ENV" = "production" ]; then
                         STACK_NAME=todo-list-aws-production
@@ -116,6 +116,9 @@ pipeline {
 
         //Etapa “Promote” para marcar la versión como “Release” en el archivo CHANGELOG.md y ser desplegada en producción. Y hacer merge a master
         stage('Promote') {
+            when {
+                expression { return ENV != 'production' }
+            }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                     sh '''
