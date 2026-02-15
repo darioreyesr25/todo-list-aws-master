@@ -51,7 +51,7 @@ pipeline {
                     '''
                     // Registro de incidencias con Warnings Next Generation Plugin, continuar sin importar el resultado de Bandit
                     recordIssues(
-                        tools: [bandit(name: 'Bandit', pattern: 'todo-list-aws-master/bandit.out')],
+                        tools: [pythonBandit(name: 'Bandit', pattern: 'todo-list-aws-master/bandit.out')],
                         qualityGates: [
                                 // Si hay más de 5 avisos: UNSTABLE (Amarillo)
                                 [threshold: 5, type: 'TOTAL', unstable: true],
