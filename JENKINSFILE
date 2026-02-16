@@ -152,10 +152,10 @@ pipeline {
                         echo -e "\n## [Release] - $fecha\n### Promoción a producción\n" >> CHANGELOG.md
                         git add CHANGELOG.md
                         git commit -m "chore: marcar versión $version como Release en CHANGELOG.md"
-                        # Merge a master
-                        git checkout master
+                        # Merge a production
+                        git checkout production
                         git merge develop
-                        git push https://${GIT_USER}:${GIT_TOKEN}@github.com/darioreyesr25/todo-list-aws-master.git master
+                        git push https://${GIT_USER}:${GIT_TOKEN}@github.com/darioreyesr25/todo-list-aws-master.git production
                     '''
                 }
             }
