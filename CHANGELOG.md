@@ -15,4 +15,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -e 
 ## [Release] - 2026-02-15
 ### Promoción a producción
-
