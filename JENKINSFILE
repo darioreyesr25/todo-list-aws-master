@@ -143,6 +143,7 @@ pipeline {
                     // Si la etapa se omite, no marcar UNSTABLE sino SUCCESS para que el pipeline no se marque como inestable sino como exitoso, ya que no es un error sino una decisión de omitir esta etapa en entornos que no son producción
                     currentBuild.result = 'SUCCESS'
                 }
+                // Usar credenciales para autenticarse en GitHub y hacer push a la rama production
                 withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
                     sh '''
                         cd todo-list-aws-master
