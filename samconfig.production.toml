@@ -1,0 +1,11 @@
+# Archivo de configuración SAM para entorno production
+[production]
+[production.deploy]
+[production.deploy.parameters]
+stack_name = "todo-list-aws-production"
+s3_bucket = "cp1.42026wr"
+s3_prefix = "todo-list-aws"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Stage=\"production\""
+image_repositories = []
