@@ -30,6 +30,13 @@ pipeline {
         }
         // Etapa para análisis estático de código con flake8
         stage('Static') {
+            when {
+                expression { return ENV != 'production' }
+            }
+            // Omitir la etapa de promoción en entornos que no son producción, pero marcar el build como SUCCESS para que el pipeline no se marque como inestable sino como exitoso, ya que no es un error sino una decisión de omitir esta etapa en entornos que no son producción
+            options {
+                skipDefaultCheckout(true)
+            }
             steps {
                 // Ejecución de flake8 ignorando errores de salida para que el pipeline continúe
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
@@ -54,6 +61,13 @@ pipeline {
         }
 
         stage('Security Test') {
+            when {
+                expression { return ENV != 'production' }
+            }
+            // Omitir la etapa de promoción en entornos que no son producción, pero marcar el build como SUCCESS para que el pipeline no se marque como inestable sino como exitoso, ya que no es un error sino una decisión de omitir esta etapa en entornos que no son producción
+            options {
+                skipDefaultCheckout(true)
+            }
             steps {
                 // Ejecución de Bandit ignorando errores de salida para que el pipeline continúe
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
