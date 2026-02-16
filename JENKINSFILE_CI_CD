@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         // Detecta el entorno según la rama: master=production, otro=staging   
-        ENV = "${env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'production' ? 'production' : 'staging'}"
+        ENV = "${env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'production' ? 'production' : 'staging'}" 
     }
     stages {
         // Definición de las etapas del pipeline
