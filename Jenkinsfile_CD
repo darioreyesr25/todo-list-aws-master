@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        ENV = "${env.BRANCH_NAME == 'master' ? 'production' : 'staging'}"
+        ENV = "production"
     }
     stages {
         stage('Get Code') {
