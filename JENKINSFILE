@@ -93,7 +93,7 @@ pipeline {
                 sh '''
                     cd todo-list-aws-master
                     sam build
-                    sam deploy --config-env $ENV --no-confirm-changeset --no-fail-on-empty-changeset || true
+                    sam deploy --config-file samconfig.production.toml --config-env production --no-confirm-changeset --no-fail-on-empty-changeset || true
                     # Obtener la URL del API Gateway del output de CloudFormation
                     if [ "$ENV" = "production" ]; then
                         STACK_NAME=todo-list-aws-production
