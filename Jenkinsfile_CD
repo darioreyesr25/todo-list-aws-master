@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+    environment {
+        ENV = "production"
+    }
+    stages {
+        stage('Get Code') {
+            steps {
+                sh '''
+                    echo "La rama es: $BRANCH_NAME"
+                    rm -rf todo-list-aws-master
+                    if [ "$ENV" = "production" ]; then
+                        BRANCH=master
+                    else
+                        BRANCH=develop
+                    fi
+                    git clone --branch $BRANCH https://github.com/darioreyesr25/todo-list-aws-master.git
+                    ls todo-list-aws-master
+                '''
+                echo WORKSPACE
+            }
+        }
+        stage('Deploy') {
+            steps {
+                sh '''
+                    cd todo-list-aws-master
+                    sam build
+                    sam deploy --config-env $ENV --no-confirm-changeset --no-fail-on-empty-changeset || true
+                    if [ "$ENV" = "production" ]; then
+                        STACK_NAME=todo-list-aws-production
+                    else
+                        STACK_NAME=todo-list-aws-staging
+                    fi
+                    export BASE_URL=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
+                    echo "BASE_URL obtenido: $BASE_URL"
+                    echo $BASE_URL > ../base_url.txt
+                '''
+                stash includes: 'base_url.txt', name: 'baseurlfile'
+            }
+        }
+        stage('Rest Test') {
+            steps {
+                unstash 'baseurlfile'
+                sh '''
+                    cd todo-list-aws-master
+                    export BASE_URL=$(cat ../base_url.txt)
+                    export PYTHONPATH=$WORKSPACE
+                    if [ "$ENV" = "production" ]; then
+                        pytest test/integration/todoApiTest.py -k "get or list" --junitxml=integration_test_report.xml || true
+                    else
+                        pytest test/integration/todoApiTest.py --junitxml=integration_test_report.xml || true
+                    fi
+                '''
+                junit allowEmptyResults: true, testResults: 'todo-list-aws-master/integration_test_report.xml'
+            }
+        }
+    }
+}
