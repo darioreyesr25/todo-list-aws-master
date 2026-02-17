@@ -19,11 +19,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Release] - 2026-02-16
 ### Promoción a producción
 
--e 
-## [Release] - 2026-02-16
-### Promoción a producción
-
--e 
-## [Release] - 2026-02-17
-### Promoción a producción
-
