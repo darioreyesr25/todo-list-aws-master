@@ -24,7 +24,8 @@ pipeline {
                     git clone --branch $BRANCH https://github.com/darioreyesr25/todo-list-aws-master.git
                     ls todo-list-aws-master
                 '''
-                // Stash del repositorio para compartir entre agentes
+                // Stash del repositorio completo (incluyendo los tests) para compartir entre agentes
+                // Esto asegura que la carpeta test/ esté disponible en la etapa Rest Test
                 stash includes: 'todo-list-aws-master/**', name: 'repo'
                 echo WORKSPACE
             }
@@ -106,7 +107,7 @@ pipeline {
 
         //etapa para ejecutar pruebas de integración con pytest
         stage('Rest Test') {
-            agent { label 'agente2' }
+            agent { label 'agente3' }
             steps {
                 unstash 'repo'
                 sh 'whoami'
