@@ -117,6 +117,7 @@ pipeline {
                 sh '''
                     cd todo-list-aws-master
                     export BASE_URL=$(cat ../base_url.txt)
+                    echo "BASE_URL en Rest Test: $BASE_URL"
                     export PYTHONPATH=$WORKSPACE
                     # Generar el reporte para junits
                     if [ "$ENV" = "production" ]; then
